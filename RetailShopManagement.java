@@ -14,13 +14,12 @@ class Product {
     }
 }
 
-public class RetailShopManagement {
+public class Main {
 
     static Scanner sc = new Scanner(System.in);
     static Map<Integer, Product> inventory = new LinkedHashMap<>();
 
     public static void main(String[] args) {
-
         int choice;
 
         do {
@@ -51,37 +50,49 @@ public class RetailShopManagement {
                     System.out.println("Thank you for using the system!");
                     break;
                 default:
-                    System.out.println("Invalid choice. Try again.");
+                    System.out.println("Invalid choice. Enter 1-5.");
             }
-
         } while (choice != 5);
-
-        sc.close();
     }
 
     static int readInt() {
-        while (!sc.hasNextInt()) {
-            System.out.print("Enter a valid integer: ");
-            sc.next();
+        while (true) {
+            if (sc.hasNextInt()) {
+                int value = sc.nextInt();
+                sc.nextLine();
+                return value;
+            }
+
+            System.out.print("Invalid input. Enter an integer: ");
+            sc.nextLine();
         }
-        int value = sc.nextInt();
-        sc.nextLine();
-        return value;
     }
 
     static double readDouble() {
-        while (!sc.hasNextDouble()) {
-            System.out.print("Enter a valid number: ");
-            sc.next();
+        while (true) {
+            if (sc.hasNextDouble()) {
+                double value = sc.nextDouble();
+                sc.nextLine();
+
+                if (Double.isFinite(value)) {
+                    return value;
+                }
+            } else {
+                sc.nextLine();
+            }
+
+            System.out.print("Invalid input. Enter a valid number: ");
         }
-        double value = sc.nextDouble();
-        sc.nextLine();
-        return value;
     }
 
     static void addProduct() {
         System.out.print("Enter Product ID: ");
         int id = readInt();
+
+        if (id <= 0) {
+            System.out.println("Product ID must be positive.");
+            return;
+        }
 
         if (inventory.containsKey(id)) {
             System.out.println("Product ID already exists.");
@@ -89,9 +100,9 @@ public class RetailShopManagement {
         }
 
         System.out.print("Enter Product Name: ");
-        String name = sc.nextLine();
+        String name = sc.nextLine().trim();
 
-        if (name.trim().isEmpty()) {
+        if (name.isEmpty()) {
             System.out.println("Product name cannot be empty.");
             return;
         }
@@ -99,11 +110,16 @@ public class RetailShopManagement {
         System.out.print("Enter Product Price: ");
         double price = readDouble();
 
+        if (price < 0) {
+            System.out.println("Price cannot be negative.");
+            return;
+        }
+
         System.out.print("Enter Stock Quantity: ");
         int quantity = readInt();
 
-        if (price < 0 || quantity < 0) {
-            System.out.println("Price and quantity cannot be negative.");
+        if (quantity < 0) {
+            System.out.println("Quantity cannot be negative.");
             return;
         }
 
@@ -149,14 +165,18 @@ public class RetailShopManagement {
             return;
         }
 
+        System.out.print("Enter Customer Name: ");
+        String customerName = sc.nextLine().trim();
+
+        if (customerName.isEmpty()) {
+            System.out.println("Customer name cannot be empty.");
+            return;
+        }
+
         double total = 0;
         boolean hasItems = false;
 
         System.out.println("\n========== CUSTOMER BILL ==========");
-
-        System.out.print("Enter Customer Name: ");
-        String customerName = sc.nextLine();
-
         System.out.printf("%-20s %-8s %-12s %-12s%n",
                 "Product", "Qty", "Price", "Amount");
 
@@ -166,6 +186,11 @@ public class RetailShopManagement {
 
             if (id == 0) {
                 break;
+            }
+
+            if (id < 0) {
+                System.out.println("Product ID must be positive.");
+                continue;
             }
 
             Product p = inventory.get(id);
@@ -192,6 +217,13 @@ public class RetailShopManagement {
             }
 
             double amount = p.price * qty;
+
+            if (!Double.isFinite(amount)
+                    || !Double.isFinite(total + amount)) {
+                System.out.println("Amount is too large to process.");
+                continue;
+            }
+
             total += amount;
             p.quantity -= qty;
             hasItems = true;
