@@ -14,7 +14,7 @@ class Product {
     }
 }
 
-public class Main {
+public class RetailShopManagement {
 
     static Scanner sc = new Scanner(System.in);
     static Map<Integer, Product> inventory = new LinkedHashMap<>();
